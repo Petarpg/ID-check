@@ -1,5 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { CameraIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  CameraIcon,
+  PhotoIcon,
+  XMarkIcon,
+  ArrowPathIcon,
+} from "@heroicons/react/24/outline";
 
 interface PhotoUploadButtonProps {
   label: string;
@@ -16,6 +21,9 @@ export default function PhotoUploadButton({
 }: PhotoUploadButtonProps) {
   const [showOptions, setShowOptions] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
+  const [facingMode, setFacingMode] = useState<"user" | "environment">(
+    "environment"
+  );
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
@@ -53,7 +61,7 @@ export default function PhotoUploadButton({
     async function enableCamera() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
+          video: { facingMode },
         });
         if (!active) {
           stream.getTracks().forEach((track) => track.stop());
@@ -75,7 +83,7 @@ export default function PhotoUploadButton({
         streamRef.current = null;
       }
     };
-  }, [showCamera]);
+  }, [showCamera, facingMode]);
 
   const capturePhoto = () => {
     if (videoRef.current) {
@@ -89,6 +97,10 @@ export default function PhotoUploadButton({
       onPhotoUpload(category, photoUrl);
       stopCamera();
     }
+  };
+
+  const handleSwitchCamera = () => {
+    setFacingMode((prev) => (prev === "user" ? "environment" : "user"));
   };
 
   return (
@@ -161,6 +173,14 @@ export default function PhotoUploadButton({
                 playsInline
                 className="w-full h-full object-cover"
               />
+              <button
+                onClick={handleSwitchCamera}
+                className="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full p-2 shadow hover:bg-opacity-100 transition-colors"
+                title="Switch Camera"
+                type="button"
+              >
+                <ArrowPathIcon className="h-6 w-6 text-gray-700" />
+              </button>
             </div>
             <div className="mt-4 flex justify-center">
               <button
