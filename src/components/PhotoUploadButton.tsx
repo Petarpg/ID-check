@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { CameraIcon, PhotoIcon } from "@heroicons/react/24/outline";
+import { useState, useRef } from "react";
+import { CameraIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 interface PhotoUploadButtonProps {
   label: string;
@@ -15,6 +15,9 @@ export default function PhotoUploadButton({
   currentPhoto,
 }: PhotoUploadButtonProps) {
   const [showOptions, setShowOptions] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -29,25 +32,38 @@ export default function PhotoUploadButton({
     }
   };
 
-  const handleCameraCapture = async () => {
+  const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      const video = document.createElement("video");
-      video.srcObject = stream;
-      await video.play();
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      setShowCamera(true);
+    } catch (error) {
+      console.error("Error accessing camera:", error);
+    }
+  };
 
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    setShowCamera(false);
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current) {
       const canvas = document.createElement("canvas");
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
       const context = canvas.getContext("2d");
-      context?.drawImage(video, 0, 0);
+      context?.drawImage(videoRef.current, 0, 0);
 
       const photoUrl = canvas.toDataURL("image/jpeg");
       onPhotoUpload(category, photoUrl);
-
-      stream.getTracks().forEach((track) => track.stop());
-    } catch (error) {
-      console.error("Error accessing camera:", error);
+      stopCamera();
     }
   };
 
@@ -77,7 +93,7 @@ export default function PhotoUploadButton({
               />
             </label>
             <button
-              onClick={handleCameraCapture}
+              onClick={startCamera}
               className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200"
             >
               <CameraIcon
@@ -98,6 +114,38 @@ export default function PhotoUploadButton({
               alt={label}
               className="w-full h-full object-cover"
             />
+          </div>
+        </div>
+      )}
+
+      {showCamera && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-4 max-w-lg w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Take Photo</h3>
+              <button
+                onClick={stopCamera}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <XMarkIcon className="h-6 w-6" />
+              </button>
+            </div>
+            <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="mt-4 flex justify-center">
+              <button
+                onClick={capturePhoto}
+                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200"
+              >
+                Capture
+              </button>
+            </div>
           </div>
         </div>
       )}
