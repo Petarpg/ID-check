@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { CameraIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 interface PhotoUploadButtonProps {
@@ -32,19 +32,12 @@ export default function PhotoUploadButton({
     }
   };
 
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-      setShowCamera(true);
-    } catch (error) {
-      console.error("Error accessing camera:", error);
-    }
+  // Open camera modal
+  const startCamera = () => {
+    setShowCamera(true);
   };
 
+  // Clean up camera
   const stopCamera = () => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
@@ -52,6 +45,37 @@ export default function PhotoUploadButton({
     }
     setShowCamera(false);
   };
+
+  // Camera stream lifecycle
+  useEffect(() => {
+    if (!showCamera) return;
+    let active = true;
+    async function enableCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+        });
+        if (!active) {
+          stream.getTracks().forEach((track) => track.stop());
+          return;
+        }
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (error) {
+        console.error("Error accessing camera:", error);
+      }
+    }
+    enableCamera();
+    return () => {
+      active = false;
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      }
+    };
+  }, [showCamera]);
 
   const capturePhoto = () => {
     if (videoRef.current) {
