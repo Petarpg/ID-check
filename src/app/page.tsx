@@ -9,52 +9,72 @@ const sites = [
   { id: "helsinki", name: "Helsinki" },
 ];
 
+interface SitePhotos {
+  [siteId: string]: {
+    [category: string]: string;
+  };
+}
+
 export default function Home() {
   const [selectedSite, setSelectedSite] = useState(sites[0]);
-  const [photos, setPhotos] = useState<Record<string, string>>({});
+  const [sitePhotos, setSitePhotos] = useState<SitePhotos>({});
 
   const handlePhotoUpload = (category: string, photoUrl: string) => {
-    setPhotos((prev) => ({
+    setSitePhotos((prev) => ({
       ...prev,
-      [category]: photoUrl,
+      [selectedSite.id]: {
+        ...prev[selectedSite.id],
+        [category]: photoUrl,
+      },
     }));
   };
 
-  return (
-    <main className="min-h-screen p-4 max-w-md mx-auto">
-      <div className="mb-6">
-        <SiteSelector
-          sites={sites}
-          selectedSite={selectedSite}
-          onSiteChange={setSelectedSite}
-        />
-      </div>
+  const getCurrentPhotos = () => {
+    return sitePhotos[selectedSite.id] || {};
+  };
 
-      <div className="space-y-4">
-        <PhotoUploadButton
-          label="Truck License Plate"
-          category="truck"
-          onPhotoUpload={handlePhotoUpload}
-          currentPhoto={photos["truck"]}
-        />
-        <PhotoUploadButton
-          label="Trailer License Plate"
-          category="trailer"
-          onPhotoUpload={handlePhotoUpload}
-          currentPhoto={photos["trailer"]}
-        />
-        <PhotoUploadButton
-          label="Damaged Goods"
-          category="damaged"
-          onPhotoUpload={handlePhotoUpload}
-          currentPhoto={photos["damaged"]}
-        />
-        <PhotoUploadButton
-          label="Document"
-          category="document"
-          onPhotoUpload={handlePhotoUpload}
-          currentPhoto={photos["document"]}
-        />
+  return (
+    <main className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      <div className="max-w-4xl mx-auto p-4 sm:p-6">
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">
+            Material Delivery Tracking
+          </h1>
+          <div className="flex justify-end">
+            <SiteSelector
+              sites={sites}
+              selectedSite={selectedSite}
+              onSiteChange={setSelectedSite}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <PhotoUploadButton
+            label="Truck License Plate"
+            category="truck"
+            onPhotoUpload={handlePhotoUpload}
+            currentPhoto={getCurrentPhotos()["truck"]}
+          />
+          <PhotoUploadButton
+            label="Trailer License Plate"
+            category="trailer"
+            onPhotoUpload={handlePhotoUpload}
+            currentPhoto={getCurrentPhotos()["trailer"]}
+          />
+          <PhotoUploadButton
+            label="Damaged Goods"
+            category="damaged"
+            onPhotoUpload={handlePhotoUpload}
+            currentPhoto={getCurrentPhotos()["damaged"]}
+          />
+          <PhotoUploadButton
+            label="Document"
+            category="document"
+            onPhotoUpload={handlePhotoUpload}
+            currentPhoto={getCurrentPhotos()["document"]}
+          />
+        </div>
       </div>
     </main>
   );
