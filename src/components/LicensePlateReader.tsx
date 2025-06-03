@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createWorker, PSM } from "tesseract.js";
+import { recognizePlate } from "../utils/plateRecognizer";
 
 interface LicensePlateReaderProps {
   imageUrl: string;
@@ -15,30 +15,15 @@ export default function LicensePlateReader({
 
   const processImage = async () => {
     if (!imageUrl) return;
-
     setIsProcessing(true);
     setError(null);
-
     try {
-      const worker: any = await createWorker();
-
-      const {
-        data: { text },
-      } = await worker.recognize(imageUrl, {
-        lang: "eng",
-        tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-        tessedit_pageseg_mode: PSM.SINGLE_LINE,
-      });
-
-      const cleanedText = text.replace(/[^A-Z0-9]/g, "").trim();
-
-      if (cleanedText) {
-        onPlateDetected(cleanedText);
+      const plates = await recognizePlate(imageUrl);
+      if (plates.length > 0) {
+        onPlateDetected(plates[0]);
       } else {
         setError("No license plate detected in the image");
       }
-
-      await worker.terminate();
     } catch (err) {
       setError(
         "Error processing image: " +
@@ -62,7 +47,6 @@ export default function LicensePlateReader({
       >
         {isProcessing ? "Processing..." : "Read License Plate"}
       </button>
-
       {error && <p className="mt-2 text-red-500 text-sm">{error}</p>}
     </div>
   );
