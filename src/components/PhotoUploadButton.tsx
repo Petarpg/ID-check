@@ -173,6 +173,39 @@ export default function PhotoUploadButton({
                 playsInline
                 className="w-full h-full object-cover"
               />
+              <div className="absolute inset-0 pointer-events-none">
+                <svg
+                  className="w-full h-full absolute inset-0"
+                  style={{ display: "block" }}
+                >
+                  <defs>
+                    <mask id="mask">
+                      <rect
+                        x="0"
+                        y="0"
+                        width="100%"
+                        height="100%"
+                        fill="white"
+                      />
+                      <rect
+                        x="15%"
+                        y="35%"
+                        width="70%"
+                        height="30%"
+                        fill="black"
+                      />
+                    </mask>
+                  </defs>
+                  <rect
+                    x="0"
+                    y="0"
+                    width="100%"
+                    height="100%"
+                    fill="rgba(0,0,0,0.8)"
+                    mask="url(#mask)"
+                  />
+                </svg>
+              </div>
               <button
                 onClick={handleSwitchCamera}
                 className="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full p-2 shadow hover:bg-opacity-100 transition-colors"
@@ -181,6 +214,9 @@ export default function PhotoUploadButton({
               >
                 <ArrowPathIcon className="h-6 w-6 text-gray-700" />
               </button>
+            </div>
+            <div className="mt-2 text-center text-sm text-gray-700 font-medium">
+              Align the license plate within the blue box for best results
             </div>
             <div className="mt-4 flex justify-center">
               <button
