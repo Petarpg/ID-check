@@ -4,6 +4,8 @@ import { useState } from "react";
 import SiteSelector from "@/components/SiteSelector";
 import PhotoUploadButton from "@/components/PhotoUploadButton";
 import LicensePlateReader from "@/components/LicensePlateReader";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
 
 const sites = [
   { id: "london", name: "London" },
@@ -162,6 +164,56 @@ export default function Home() {
               )}
             </div>
           </div>
+        </div>
+        {/* Export Buttons */}
+        <div className="mt-6 flex gap-4">
+          <button
+            onClick={() => {
+              const data = [
+                {
+                  Type: "Truck",
+                  Plate: getCurrentPlateNumbers()["truck"] || "",
+                },
+                {
+                  Type: "Trailer",
+                  Plate: getCurrentPlateNumbers()["trailer"] || "",
+                },
+              ];
+              const ws = XLSX.utils.json_to_sheet(data);
+              const wb = XLSX.utils.book_new();
+              XLSX.utils.book_append_sheet(wb, ws, "Plates");
+              XLSX.writeFile(wb, "license-plates.xlsx");
+            }}
+            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+          >
+            Export to Excel
+          </button>
+          <button
+            onClick={() => {
+              const doc = new jsPDF();
+              doc.setFontSize(16);
+              doc.text("Stored License Plate Numbers", 10, 20);
+              doc.setFontSize(12);
+              doc.text(
+                `Truck License Plate: ${
+                  getCurrentPlateNumbers()["truck"] || "Not detected yet"
+                }`,
+                10,
+                40
+              );
+              doc.text(
+                `Trailer License Plate: ${
+                  getCurrentPlateNumbers()["trailer"] || "Not detected yet"
+                }`,
+                10,
+                55
+              );
+              doc.save("license-plates.pdf");
+            }}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+          >
+            Export to PDF
+          </button>
         </div>
       </div>
     </main>
