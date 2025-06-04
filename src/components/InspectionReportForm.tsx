@@ -53,7 +53,7 @@ export default function InspectionReportForm({
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setForm((prev) => ({ ...prev, [key]: reader.result as string }));
+        setForm((prev: any) => ({ ...prev, [key]: reader.result as string }));
       };
       reader.readAsDataURL(file);
     }
