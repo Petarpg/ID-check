@@ -199,6 +199,7 @@ export default function Home() {
           truckPhoto={getCurrentPhotos()["truck"]}
           trailerPhoto={getCurrentPhotos()["trailer"]}
           damagedPhoto={getCurrentPhotos()["damaged"]}
+          documentPhoto={getCurrentPhotos()["document"]}
         />
       </div>
       {/* Export Buttons Section (centered below the form) */}

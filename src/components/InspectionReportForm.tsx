@@ -12,6 +12,7 @@ interface InspectionReportFormProps {
   truckPhoto?: string;
   trailerPhoto?: string;
   damagedPhoto?: string;
+  documentPhoto?: string;
 }
 
 export default function InspectionReportForm({
@@ -24,6 +25,7 @@ export default function InspectionReportForm({
   truckPhoto,
   trailerPhoto,
   damagedPhoto,
+  documentPhoto,
 }: InspectionReportFormProps) {
   useEffect(() => {
     setForm((prev: any) => ({
@@ -234,11 +236,11 @@ export default function InspectionReportForm({
         </tbody>
       </table>
       {/* Show Document image below the table if present */}
-      {damagedPhoto && (
+      {documentPhoto && (
         <div className="mt-4">
           <div className="font-semibold mb-1">Document Image:</div>
           <img
-            src={damagedPhoto}
+            src={documentPhoto}
             alt="Document"
             className="w-64 h-auto border rounded shadow"
           />
